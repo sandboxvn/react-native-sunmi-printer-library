@@ -201,8 +201,8 @@ class SunmiPrinterLibraryModule(reactContext: ReactApplicationContext) :
     validatePrinterService(promise)
     try {
       val callback = makeInnerResultCallback(promise, "native#sendRAWData() is failed.")
-      val date = Base64.decode(base64, Base64.DEFAULT);
-      printerService?.sendRAWData(date, callback);
+      val data = Base64.decode(base64, Base64.DEFAULT)
+      printerService?.sendRAWData(data, callback)
     } catch (e: Exception) {
       promise.reject("0", "native#sendRAWData() is failed. " + e.message)
     }
@@ -314,11 +314,8 @@ class SunmiPrinterLibraryModule(reactContext: ReactApplicationContext) :
     validatePrinterService(promise)
     try {
       val callback = makeInnerResultCallback(promise, "native#setBold() is failed.")
-      val data = ByteArray(3)
-      data[0] = 0x1B
-      data[1] = 0x45
-      data[2] = if (isBold) { 0x1 } else { 0x0 }
-      printerService?.sendRAWData(data, callback);
+      val data = byteArrayOf(0x1B.toByte(), 0x45.toByte(), if (isBold) 0x1.toByte() else 0x0.toByte())
+      printerService?.sendRAWData(data, callback)
     } catch (e: Exception) {
       promise.reject("0", "native#setBold() is failed. " + e.message)
     }
@@ -371,28 +368,20 @@ class SunmiPrinterLibraryModule(reactContext: ReactApplicationContext) :
     try {
       val callback = makeInnerResultCallback(promise, "native#printColumnsText is failed.")
 
-      var _texts = arrayOf<String>()
-      for (i in 0..(texts.size()-1)){
-        _texts += texts.getString(i)
-      }
-
-      var _widths = intArrayOf()
-      for (i in 0..(widths.size()-1)){
-        _widths += widths.getInt(i)
-      }
-
-      var _alignments = intArrayOf()
-      for (i in 0..(alignments.size()-1)){
-        val temp = alignmentToInt(alignments.getString(i))
-        if(temp != null){
-          _alignments += temp
+      val _texts = Array(texts.size()) { i -> texts.getString(i) }
+      val _widths = IntArray(widths.size()) { i -> widths.getInt(i) }
+      
+      val _alignments = IntArray(alignments.size()) { i ->
+        alignmentToInt(alignments.getString(i)) ?: run {
+          promise.reject("0", "native#printColumnsText is failed because alignments is incorrect.")
+          return
         }
       }
 
       if (_texts.size == _alignments.size && _texts.size == _widths.size) {
          printerService?.printColumnsText(_texts, _widths, _alignments, callback)
        } else {
-         promise.reject("0", "native#printColumnsText is failed because alignments is incorrect.")
+         promise.reject("0", "native#printColumnsText is failed because array sizes don't match.")
        }
     } catch (e: Exception) {
       promise.reject("0", "native#printColumnsText is failed. " + e.message)
@@ -405,28 +394,20 @@ class SunmiPrinterLibraryModule(reactContext: ReactApplicationContext) :
     try {
       val callback = makeInnerResultCallback(promise, "native#printColumnsString is failed.")
 
-      var _texts = arrayOf<String>()
-      for (i in 0..(texts.size()-1)){
-        _texts += texts.getString(i)
-      }
-
-      var _widths = intArrayOf()
-      for (i in 0..(widths.size()-1)){
-        _widths += widths.getInt(i)
-      }
-
-      var _alignments = intArrayOf()
-      for (i in 0..(alignments.size()-1)){
-        val temp = alignmentToInt(alignments.getString(i))
-        if(temp != null){
-          _alignments += temp
+      val _texts = Array(texts.size()) { i -> texts.getString(i) }
+      val _widths = IntArray(widths.size()) { i -> widths.getInt(i) }
+      
+      val _alignments = IntArray(alignments.size()) { i ->
+        alignmentToInt(alignments.getString(i)) ?: run {
+          promise.reject("0", "native#printColumnsString is failed because alignments is incorrect.")
+          return
         }
       }
 
       if (_texts.size == _alignments.size && _texts.size == _widths.size) {
          printerService?.printColumnsString(_texts, _widths, _alignments, callback)
        } else {
-         promise.reject("0", "native#printColumnsString is failed because alignments is incorrect.")
+         promise.reject("0", "native#printColumnsString is failed because array sizes don't match.")
        }
     } catch (e: Exception) {
       promise.reject("0", "native#printColumnsString is failed. " + e.message)
@@ -569,8 +550,8 @@ class SunmiPrinterLibraryModule(reactContext: ReactApplicationContext) :
         promise.reject("0", "Invalid image dimensions: width and height must be greater than 0.")
         return
       }
-      // Tính chiều cao mới và làm tròn giá trị
-      val newHeight = Math.round(pixelWidth.toFloat() / w * h)
+      // Calculate new height and round the value
+      val newHeight = kotlin.math.round(pixelWidth.toFloat() / w * h).toInt()
 
       if (newHeight <= 0) {
         promise.reject("0", "Calculated height is invalid.")

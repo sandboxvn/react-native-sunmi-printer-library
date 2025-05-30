@@ -7,7 +7,7 @@ import {
   Text,
   DeviceEventEmitter,
 } from 'react-native'
-import * as SunmiPrinterLibrary from '@mitsuharu/react-native-sunmi-printer-library'
+import * as SunmiPrinterLibrary from '@sandboxvn/react-native-sunmi-printer-library'
 import { Button } from './components/Button'
 import { useToast } from 'react-native-toast-notifications'
 import {
@@ -204,14 +204,14 @@ const Container: React.FC<Props> = () => {
       const boldOnBase64 = Buffer.from(boldOn).toString('base64')
       await SunmiPrinterLibrary.sendRAWData(boldOnBase64)
 
-      await SunmiPrinterLibrary.printText('\'sendRAWData\' sets Bold to ON')
+      await SunmiPrinterLibrary.printText("'sendRAWData' sets Bold to ON")
       await SunmiPrinterLibrary.lineWrap(1)
 
       const boldOff = new Uint8Array([0x1b, 0x45, 0x00])
       const boldOffBase64 = Buffer.from(boldOff).toString('base64')
       await SunmiPrinterLibrary.sendRAWData(boldOffBase64)
 
-      await SunmiPrinterLibrary.printText('\'sendRAWData\' sets Bold to OFF')
+      await SunmiPrinterLibrary.printText("'sendRAWData' sets Bold to OFF")
       await SunmiPrinterLibrary.lineWrap(1)
 
       await SunmiPrinterLibrary.lineWrap(3)
